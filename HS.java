@@ -3,26 +3,35 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+class Channel{
+	public volatile String message = "";
+	public void putMessage(String s){
+		 message = s;
+	}
+	public String getMessage(){
+		return message;
+	}
+}
+
 class Process implements Runnable {
 
+	public static ArrayList<Channel> fromMaster = new ArrayList<Channel>();
+	public static ArrayList<Channel> toMaster = new ArrayList<Channel>();
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
 		if (type.equals("master")) {// master starts the rounds
 			ids = new int[n];
-			messagesFromMaster = new String[n];
-			messagesToMaster = new String[n];
 			spawnThreads();
 			while (!leaderElected) {
 				// initiate rounds
 				
 				for (int i = 0; i < n; i++) {
-					messagesFromMaster[i] = "START";
+					fromMaster.get(i).putMessage("START");
 					System.out.println("master> Sending message to slave " + i);
-					messagesToMaster[i] = "";
 				}
-				while (!roundDone) {
-					roundDone = isRoundDone();
+				while (!isRoundDone()) {
+					
 					//System.out.println("master> Waiting for DONE messages from slaves!" );
 				}
 				leaderElected = true;
@@ -31,8 +40,8 @@ class Process implements Runnable {
 			System.exit(0);
 		} else {// Participant in HS Algorithm
 			while (true) {
-				if (messagesFromMaster[index].equals("START")) {
-					messagesFromMaster[index] = "";
+				if (fromMaster.get(index).getMessage().equals("START")) {
+					fromMaster.get(index).putMessage("");
 					// round
 					round();
 				}
@@ -49,25 +58,24 @@ class Process implements Runnable {
 	public int currentPhase = 0;
 
 	public void round() {
-		messagesToMaster[index] = "DONE";
+		toMaster.get(index).putMessage( "DONE") ;
 		System.out.println("slave " + index + "> Sending DONE message back to master");
 	}
 
 	public boolean isRoundDone() {
-        boolean bDone = true; 
-        if(!roundDone){
+       
 		for (int i = 0; i < n; i++) {
-			if (messagesToMaster[i].equals("DONE")) {
-				 //bDone = bDone && true;
-				 return roundDone;
-				 //System.out.println("master> Received DONE from  " + i);
+			if (!toMaster.get(i).getMessage().equals("DONE")) {
+				 return false; 
 			}
 
 		}
-        }
-        roundDone = true;
-		return roundDone;
+		return true;
+	 
 	}
+	
+       
+	
 
 	public Process(int id, int index) {
 		this.id = id;
@@ -84,9 +92,11 @@ class Process implements Runnable {
 			while (set.contains(ids[i])) {
 				ids[i] = random.nextInt(Integer.MAX_VALUE);
 			}
+			Channel inbound = new Channel();
+			Channel outbound = new Channel();
+			toMaster.add(inbound);
+			fromMaster.add(outbound);
 			set.add(ids[i]);
-			messagesFromMaster[i] = "";
-			messagesToMaster[i] = "";
 			Process p = new Process(ids[i], i);
 			p.type = "slave";
 			list.add(p);
