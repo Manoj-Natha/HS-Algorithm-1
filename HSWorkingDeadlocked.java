@@ -148,7 +148,7 @@ class Process implements Runnable {
         Channel channelLeft = processChannels.get(index).get(0);
         Channel channelRight = processChannels.get(index).get(1);
         while(!channelLeft.hasMessage() || !channelRight.hasMessage()){
-           // System.out.println(id + ">STUCK");
+       //     System.out.println(id + ">STUCK");
         }
         
         String sLeft = channelLeft.getMessage();
@@ -280,9 +280,6 @@ class Process implements Runnable {
 		receiveMessages();
 		
 		Channel master = toMaster.get(index);
-		while(master.hasMessage()){
-			
-		}
 		Message m = new Message("DONE");
 		int ra = r + 1;
      	master.putMessage(m.toString() + "~" + ra ) ;
@@ -329,9 +326,9 @@ class Process implements Runnable {
 		  int neighbor = (direction.equals("LEFT")) ? left : (index + 1) % n;
 		  int target = (direction.equals("LEFT")) ? 1 : 0;
 		  Channel targetChannel =  processChannels.get(neighbor).get(target);
-		  while(targetChannel.hasMessage()){
-	          // System.out.println("STUCK123");
-		  }
+		  /*while(targetChannel.hasMessage()){
+	           System.out.println("STUCK123");
+		  }*/
 		  int ra = r + 1;
 		  targetChannel.putMessage(m.toString() + "~" + ra + "~" + index);
 	}
@@ -349,7 +346,7 @@ class Process implements Runnable {
 		ArrayList<Process> list = new ArrayList<Process>();
         int max = Integer.MIN_VALUE;
 		for (int i = 0; i < n; i++) {
-			ids[i] = random.nextInt(Integer.MAX_VALUE);
+			ids[i] =  random.nextInt(Integer.MAX_VALUE);
 			while (set.contains(ids[i])) {
 				ids[i] = random.nextInt(Integer.MAX_VALUE);
 			}
