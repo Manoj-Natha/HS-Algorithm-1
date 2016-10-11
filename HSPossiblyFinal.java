@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -90,40 +93,30 @@ class Process implements Runnable {
 		if (type.equals("master")) {// master starts the rounds
 			while (!isDone()) {
 				// initiate rounds
-				int ra = r + 1;
-			//	System.out.println("Starting round" + ra);
 				for (int i = 0; i < n; i++) {
 					    Message m = new Message("START");
-						fromMaster.get(i).putMessage(m.toString() + "~" + ra);		
+						fromMaster.get(i).putMessage(m.toString());		
 			            
-//					System.out.println("master> Sending message to slave " + i);
 				}
 				while (!isRoundDone()) {
 					
-				}
-			//	System.out.println("STUCK!!!!! " + ra);
-				r++;
-				
-			//	System.out.println("done with round! " + counter);
+				}			
 			}
 			System.exit(0);
 			
-		} else {// Participant in HS Algorithm
+		} else {
+			// Participant in HS Algorithm
 			while (true) {
 				Channel master = fromMaster.get(index);
 				int ra = r + 1;
-			//	System.out.println(index + ">Waiting to enter round " + (ra));
 				while(!master.hasMessage()){
 					
 				}
 				String text = master.getMessage();
-			//	System.out.println(text + "round: " + ra);
 				master.flush(); 
 				Message message = new Message(text);
 				if (message.getMessageText().equals("START")) {
-					// round
 					round();
-					r++;
 				}
 			}
 		}
@@ -160,7 +153,6 @@ class Process implements Runnable {
         Channel channelLeft = processChannels.get(index).get(0);
         Channel channelRight = processChannels.get(index).get(1);
         while(!channelLeft.hasMessage() || !channelRight.hasMessage()){
-             // System.out.println(id + ">STUCK***");
         }
         
         String sLeft = channelLeft.getMessage();
@@ -171,8 +163,7 @@ class Process implements Runnable {
     	boolean bCapturedLeft = false;
     	boolean bSendingLeft = false;
     	boolean bSendingRight = false;
-        //boolean bPossiblyLeader = false;    
-    	
+       
     	if(!leaderKnown && left.getMessageText().equals("LEADER")){
     		leaderKnown = true;
     		Message r = new Message("LEADER","*",-1,-1,"RIGHT");
@@ -296,7 +287,6 @@ class Process implements Runnable {
   			  phase++;
   			  Message l = new Message("HS","OUT",id,(int)Math.pow(2, phase),"LEFT");
   			  Message r = new Message("HS","OUT",id,(int)Math.pow(2, phase),"RIGHT");
-  			  //System.out.println(id + ">Entering phase " + phase);
   			  sendQueue.add(l);
   			  sendQueue.add(r);
   			  bSendingLeft = true;
@@ -330,8 +320,7 @@ class Process implements Runnable {
 	
 		if(phase == -1){
 			  phase++;
-			  //System.out.println(id  +">Enter phase 0");
-        	  Message left = new Message("HS","OUT",currentMaxPID,(int)Math.pow(2, phase),"LEFT");
+			  Message left = new Message("HS","OUT",currentMaxPID,(int)Math.pow(2, phase),"LEFT");
         	  Message right = new Message("HS","OUT",currentMaxPID,(int)Math.pow(2, phase),"RIGHT");
         	  sendQueue.add(left);
         	  sendQueue.add(right);
@@ -363,7 +352,6 @@ class Process implements Runnable {
 			}
 
 		}
-		//System.out.println("Count: " + Process.count);
 		for(int i = 0; i < n; i++){
 			toMaster.get(i).flush();
 		}
@@ -392,11 +380,9 @@ class Process implements Runnable {
 		  /*while(targetChannel.hasMessage()){
 	           System.out.println("STUCK123");
 		  }*/
-		  int ra = r + 1;
 		  if(m.toString().startsWith("DUMMY")){
-			//  System.out.println(id + ">SENDING DUMMY " + m.getDirection());
 		  }
-		  targetChannel.putMessage(m.toString() + "~" + ra + "~" + index);
+		  targetChannel.putMessage(m.toString());
 	}
 
 	public Process(int id, int index) {
@@ -450,6 +436,10 @@ class Process implements Runnable {
 }
 
 public class HSPossiblyFinal {
+	
+	public static void readFile(String path){
+		Scanner s = new Scanner(path);
+	}
 
 	public static void main(String args[]) {
 		int n = Integer.parseInt(args[0]);
